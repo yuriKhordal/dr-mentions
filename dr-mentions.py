@@ -19,7 +19,7 @@ async def sendNotif(mention: str, summary: str, link: str, all: bool = False):
     from webbrowser import open
 
     if (all):
-        title = mention.replace('@', '') + 'in a comment!'
+        title = mention.replace('@', '') + ' in a comment!'
     else:
         author = mention[:mention.find(' mentioned @')]
         title = author + ' mentioned you in a comment!'
@@ -33,7 +33,7 @@ async def sendNotif(mention: str, summary: str, link: str, all: bool = False):
 
 def sendNotifCli(mention: str, summary: str, link: str, all: bool = False):
     if (all):
-        title = mention.replace('@', '') + 'in a comment!'
+        title = mention.replace('@', '') + ' in a comment!'
     else:
         author = mention[:mention.find(' mentioned @')]
         title = author + ' mentioned you in a comment!'
