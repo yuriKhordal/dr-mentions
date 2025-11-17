@@ -11,21 +11,34 @@ RSS_URL = 'https://static.molodetz.nl/dr.mentions.xml'
 DEFAULT_CONFIG_PATH = os.path.join(user_config_dir(), 'dr-mentions.conf')
 # ICON_PATH = '/home/yuri/Programming/python/devrant-mentions/logo.png'
 ICON_PATH = os.path.join(SCRIPT_DIR, 'icon.png')
-SLEEP = 15
+SLEEP = 90
 
 notifier = DesktopNotifier('devRant Mentions', Icon(uri=ICON_PATH))
 
-async def sendNotif(author: str, summary: str, link: str):
+async def sendNotif(mention: str, summary: str, link: str, all: bool = False):
     from webbrowser import open
+
+    if (all):
+        title = mention.replace('@', '') + 'in a comment!'
+    else:
+        author = mention[:mention.find(' mentioned @')]
+        title = author + ' mentioned you in a comment!'
+    
     await notifier.send(
-        title=author + ' mentioned you in a comment!',
+        title=title,
         message=summary.replace('&quot;', '"') + "\n" + link,
         buttons=[Button("Open in Browswer", lambda: open(link))],
         on_clicked=lambda: open(link)
     )
 
-def sendNotifCli(author: str, summary: str, link: str):
-    header = f' 🔴 {author} mentioned you in a comment!    '
+def sendNotifCli(mention: str, summary: str, link: str, all: bool = False):
+    if (all):
+        title = mention.replace('@', '') + 'in a comment!'
+    else:
+        author = mention[:mention.find(' mentioned @')]
+        title = author + ' mentioned you in a comment!'
+
+    header = f' 🔴 {title}    '
     print('-' * len(header))
     print(header)
     print('-' * len(header))
@@ -38,9 +51,11 @@ async def rss_listen(ctx):
     import asyncio
 
     etag: str = None
-    lastModified: str = ctx['lastModified']
-    lastMention = _parse_date(lastModified)
+    prevRssMod: str = None
     stop: bool = False
+
+    strLastMention = ctx['lastMention']
+    lastMention = _parse_date(strLastMention)
 
     # i = 1
     # RSS_URL = open('rss-1.xml').read()
@@ -48,7 +63,7 @@ async def rss_listen(ctx):
     # lastMention = _parse_date(lastModified)
     while not stop:
         try:
-            rss = parse(RSS_URL, etag=etag, modified=lastModified)
+            rss = parse(RSS_URL, etag=etag, modified=prevRssMod)
             status = rss['status']
             if (status == 304):
                 await asyncio.sleep(SLEEP)
@@ -57,22 +72,24 @@ async def rss_listen(ctx):
                 raise RuntimeError(f"Can't connect to '{RSS_URL}'.")
 
             etag = rss['etag']
-            lastModified = rss['feed']['updated']
+            prevRssMod = rss['feed']['updated']
             entries: list = rss['entries']
             entries.sort(key=lambda entry: entry['published_parsed'], reverse=True)
 
             for entry in entries:
-                if (entry['published_parsed'] < lastMention):
+                if (entry['published_parsed'] <= lastMention):
                     break
                 mention = entry['title'].split(' mentioned @')
-                if (mention[1] == ctx['user']):
+                print('[DEBUG] entry: ', entry, flush=True)
+                if (mention[1] == ctx['user'] or ctx['user'] == '*'):
                     if (not ctx['cli']):
-                        await sendNotif(mention[0], entry['summary'], entry['link'])
+                        await sendNotif(entry['title'], entry['summary'], entry['link'], ctx['user'] == '*')
                     else:
-                        sendNotifCli(mention[0], entry['summary'], entry['link'])
+                        sendNotifCli(entry['title'], entry['summary'], entry['link'], ctx['user'] == '*')
 
-            lastMention = rss['feed']['updated_parsed']
-            updateMention(ctx['config'], lastModified)
+            strLastMention = entries[0]['published']
+            lastMention = entries[0]['published_parsed'] # Publish time of most recent mention
+            updateMention(ctx['config'], strLastMention)
             await asyncio.sleep(SLEEP)
             # if i == 1:
             #     RSS_URL = open('rss-2.xml').read()
@@ -110,18 +127,23 @@ def main():
         conf['Subscribe'] = args.subscribe_to
 
     if ('LastMention' in conf and conf['LastMention'] != 'None' and not _isEmptyOrSpace(conf['LastMention'])):
-        lastModified = conf['LastMention']
+        lastMention = conf['LastMention']
     else:
+        # Note:
+        # With the RSS bug we found that is only showing messages 1 step behind this will now make a bug
+        # Where the first time you run `dr-mentiond` you won't see the last few messages, but this bug is acceptable
+        # to me in the grand scheme of things. A few messages missed as a one time thing when you install the script
+        # is nothing
         resp = requests.head(RSS_URL)
         if (resp.status_code != 200):
             raise RuntimeError(f"Can't connect to '{RSS_URL}'.")
-        lastModified = resp.headers['Last-Modified']
-        updateMention(config, lastModified)
+        lastMention = resp.headers['Last-Modified']
+        updateMention(config, lastMention)
     
     ctx = {
         'config': config,
         'user': conf['User'],
-        'lastModified': lastModified,
+        'lastMention': lastMention,
         'subs': conf['Subscribe'],
         'cli': args.cli
     }
@@ -209,135 +231,5 @@ def _init(ctx):
         exit(1)
     exit(0)
 
-async def test():
-    import asyncio
-    messages = [{
-        'author': 'retoor',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@SoldierOfCode https://devrant.com/rants/19384567/...'''
-    },{
-        'author': 'retoor',
-        'link': 'https://devrant.com/rants/19384567',
-        'message': '''@SoldierOfCode and @Lensflare
-
-    Edit: @Lensflare structure is totally the same, guuid has a different format tho. 
-
-    @SoldierOfCode your @whimsical @whimsical @whimsical @whimsical test still shows as one mention, because it works per unique name. So mention to two different users will do result in seperate items.
-                            '''
-    },{
-        'author': 'retoor',
-        'link': 'https://devrant.com/rants/19384567',
-        'message': '''@SoldierOfCode and @Lensflare
-
-    Edit: @Lensflare structure is totally the same, guuid has a different format tho. 
-
-    @SoldierOfCode your @whimsical @whimsical @whimsical @whimsical test still shows as one mention, because it works per unique name. So mention to two different users will do result in seperate items.
-                            '''
-    },{
-        'author': 'retoor',
-        'link': 'https://devrant.com/rants/19384567',
-        'message': '''@SoldierOfCode and @Lensflare
-
-    Edit: @Lensflare structure is totally the same, guuid has a different format tho. 
-
-    @SoldierOfCode your @whimsical @whimsical @whimsical @whimsical test still shows as one mention, because it works per unique name. So mention to two different users will do result in seperate items.
-                            '''
-    },{
-        'author': 'CoreFusionX',
-        'link': 'https://devrant.com/rants/19384359',
-        'message': '''@CaptainRant 
-
-    If you quit your job and want to start in a new stack from scratch, you go back to being a junior, and that's it. Your previous knowledge should allow you to climb relatively fast, but you are still a junior in the stack.
-                            '''
-    },{
-        'author': 'whimsical',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@SoldierOfCode ah, makes it a bit more complex, but thanks for your research. I gonna eat and will fix it and thanks for the test data 😁 also, I'm never bored :p I see you guys as top priority 😁 after snek users :p
-                            '''
-    },{
-        'author': 'whimsical',
-        'link': 'https://devrant.com/rants/19384456',
-        'message': '''@Lensflare he doesn't have the balls :p
-                            '''
-    },{
-        'author': 'Lensflare',
-        'link': 'https://devrant.com/rants/19384456',
-        'message': '''@whimsical why would you give him ideas like this?
-    Now he will flood it with pictures of his dick and his literal shit.
-    And you are warning HIM of the content there?
-                            '''
-    },{
-        'author': 'SoldierOfCode',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''For example, this test message should generate four mentions: @whimsical @whimsical @whimsical @whimsical
-
-    ('should' as in, I suspect it will, correctly it should only generate one)
-                            '''
-    },{
-        'author': 'SoldierOfCode',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@whimsical OHHH, I looked at the XML and THAT'S why there are &quot;duplicates&quot;! The XML file actually DOES show three different items for your message, one for &quot;whimsical mentioned(at)SoldierOfCode&quot; and two(because you mentioned him twice) for (at)Lensflare, but since all three have the same guid the RSS software sees them as one. That's probably the &quot;duplicates&quot; @Lensflare was seeing, in which case it's not duplicates and it works.
-
-    Tho you should probablt treat the case where you mention the person more than once in the same message so it'd only generate one item per person.
-
-    And for the guid's you could make it instead of `devrant-mention-19384527` be `devrant-mention-19384527-1` for example, and for each additional mention ++ the counter so second mention(in the same message) would be `devrant-mention-19384527-2` and continued
-                            '''
-    },{
-        'author': 'SoldierOfCode',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@whimsical OHHH, I looked at the XML and THAT'S why there are &quot;duplicates&quot;! The XML file actually DOES show three different items for your message, one for &quot;whimsical mentioned(at)SoldierOfCode&quot; and two(because you mentioned him twice) for (at)Lensflare, but since all three have the same guid the RSS software sees them as one. That's probably the &quot;duplicates&quot; @Lensflare was seeing, in which case it's not duplicates and it works.
-
-    Tho you should probablt treat the case where you mention the person more than once in the same message so it'd only generate one item per person.
-
-    And for the guid's you could make it instead of `devrant-mention-19384527` be `devrant-mention-19384527-1` for example, and for each additional mention ++ the counter so second mention(in the same message) would be `devrant-mention-19384527-2` and continued
-                            '''
-    },{
-        'author': 'SoldierOfCode',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@whimsical Oh, btw, I just noticed the RSS feed only reports one mention. For example your messgse here was reported as &quot;whimsical mentioned (at)SoldierOfCode&quot; but does report that you also mentioned (at)Lensflare
-                            '''
-    },{
-        'author': 'whimsical',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@SoldierOfCode aww, thanks. I will look in it today, duplication also mentioned by @Lensflare. But I don't know if I can add the &quot;Add new rant&quot; notifs in this rss because it maybe breaks @Lensflare system that depends on it. Maybe I could make extra rss. Will see how far I get :)
-                            '''
-    },{
-        'author': 'whimsical',
-        'link': 'https://devrant.com/rants/19381730',
-        'message': '''@SoldierOfCode aww, thanks. I will look in it today, duplication also mentioned by @Lensflare. But I don't know if I can add the &quot;Add new rant&quot; notifs in this rss because it maybe breaks @Lensflare system that depends on it. Maybe I could make extra rss. Will see how far I get :)
-                            '''
-    },{
-        'author': 'D-4got10-01',
-        'link': 'https://devrant.com/rants/19384402',
-        'message': '''@whimsical I wouldn't be surprised if it was either malicious or a marketing move... or both.
-
-    'Want to know whether this paper has been written by a human or is machine-generated? _We_ have a solution for you. Subscribe.',
-                            '''
-    },{
-        'author': 'whimsical',
-        'link': 'https://devrant.com/rants/19384402',
-        'message': '''@D-4got10-01 yeah, you could think maybe, leave it there just like pictures from gemini have a little logo so you can see it's AI.
-                            '''
-    },{
-        'author': 'AlgoRythm',
-        'link': 'https://devrant.com/rants/19384200',
-        'message': '''@Lensflare I don't quite see myself working with Swift or Kotlin in the foreseeable future, unfortunately. I do quite like Swift though, maybe I'll spend a weekend with it one of these times.
-                            '''
-    },{
-        'author': 'AlgoRythm',
-        'link': 'https://devrant.com/rants/19384200',
-        'message': '''@Lensflare That's the tragedy, isn't it? Excited to learn it, but crushed by the reality that it'll only ever benefit me in personal projects or academically.
-                            '''
-    }
-    ]
-    
-    messages.append(messages[10])
-    for msg in messages[-3:]:
-        await sendNotif(msg['author'], msg['message'], msg['link'])
-    
-    await asyncio.sleep(5)
-
 if (__name__ == "__main__"):
     main()
-    # import asyncio
-    # asyncio.run(test())
