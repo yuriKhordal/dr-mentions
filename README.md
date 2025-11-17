@@ -10,7 +10,7 @@ It is intended to be run as a **user-level systemd service**, but can also be us
 
 Download the latest release from the `Releases` page and unpack it where you want or clone the git repository directly with:
 ```bash
-git clone <whatever here>
+git clone https://github.com/yuriKhordal/dr-mentions.git
 ```
 cd into the newly extracted or cloned project directory and run the `install.sh` script:
 ```bash

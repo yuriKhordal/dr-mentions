@@ -11,4 +11,4 @@ Restart=on-failure
 RestartSec=60
 
 [Install]
-WantedBy=graphical.target
+WantedBy=default.target

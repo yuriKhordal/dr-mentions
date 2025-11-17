@@ -1,6 +1,5 @@
 #!/bin/bash
-APP_DIR=~/Programming/python/dr-mentions
-# APP_DIR=/usr/share
+APP_DIR=/usr/share/dr-mentions
 
 source $APP_DIR/.venv/bin/activate
 python $APP_DIR/dr-mentions.py "$@"
