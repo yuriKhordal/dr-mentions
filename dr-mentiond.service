@@ -1,0 +1,14 @@
+[Unit]
+Description=devRant notifications service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dr-mentiond
+WorkingDirectory=/usr/share/dr-mentions
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<rss version="2.0">
+  <channel>
+    <title>devRant Mentions Feed</title>
+    <link>https://devrant.com</link>
+    <description>Live feed of all @mentions on devRant</description>
+    <lastBuildDate>Sun, 16 Nov 2025 13:58:50 GMT</lastBuildDate>
+    <item>
+      <title>SoldierOfCode mentioned @whimsical</title>
+      <link>https://devrant.com/rants/19381730</link>
+      <description>@whimsical OHHH, I looked at the XML and THAT'S why there are &quot;duplicates&quot;! The XML file actually DOES show three different items for your message, one for &quot;whimsical mentioned(at)SoldierOfCode&quot; and two(because you mentioned him twice) for (at)Lensflare, but since all three have the same guid the RSS software sees them as one. That's probably the &quot;duplicates&quot; @Lensflare was seeing, in which case it's not duplicates and it works.
+
+Tho you should probablt treat the case where you mention the person more than once in the same message so it'd only generate one item per person.
+
+And for the guid's you could make it instead of `devrant-mention-19384527` be `devrant-mention-19384527-1` for example, and for each additional mention ++ the counter so second mention(in the same message) would be `devrant-mention-19384527-2` and continued</description>
+      <guid isPermaLink="false">devrant-mention-19384534-to-whimsical</guid>
+      <pubDate>Sun, 16 Nov 2025 13:58:35 GMT</pubDate>
+    </item>
+    <item>
+      <title>SoldierOfCode mentioned @Lensflare</title>
+      <link>https://devrant.com/rants/19381730</link>
+      <description>@whimsical OHHH, I looked at the XML and THAT'S why there are &quot;duplicates&quot;! The XML file actually DOES show three different items for your message, one for &quot;whimsical mentioned(at)SoldierOfCode&quot; and two(because you mentioned him twice) for (at)Lensflare, but since all three have the same guid the RSS software sees them as one. That's probably the &quot;duplicates&quot; @Lensflare was seeing, in which case it's not duplicates and it works.
+
+Tho you should probablt treat the case where you mention the person more than once in the same message so it'd only generate one item per person.
+
+And for the guid's you could make it instead of `devrant-mention-19384527` be `devrant-mention-19384527-1` for example, and for each additional mention ++ the counter so second mention(in the same message) would be `devrant-mention-19384527-2` and continued</description>
+      <guid isPermaLink="false">devrant-mention-19384534-to-Lensflare</guid>
+      <pubDate>Sun, 16 Nov 2025 13:58:35 GMT</pubDate>
+    </item>
+    <item>
+      <title>SoldierOfCode mentioned @whimsical</title>
+      <link>https://devrant.com/rants/19381730</link>
+      <description>@whimsical Oh, btw, I just noticed the RSS feed only reports one mention. For example your messgse here was reported as &quot;whimsical mentioned (at)SoldierOfCode&quot; but does report that you also mentioned (at)Lensflare</description>
+      <guid isPermaLink="false">devrant-mention-19384533-to-whimsical</guid>
+      <pubDate>Sun, 16 Nov 2025 13:51:04 GMT</pubDate>
+    </item>
+    <item>
+      <title>whimsical mentioned @SoldierOfCode</title>
+      <link>https://devrant.com/rants/19381730</link>
+      <description>@SoldierOfCode aww, thanks. I will look in it today, duplication also mentioned by @Lensflare. But I don't know if I can add the &quot;Add new rant&quot; notifs in this rss because it maybe breaks @Lensflare system that depends on it. Maybe I could make extra rss. Will see how far I get :)</description>
+      <guid isPermaLink="false">devrant-mention-19384527-to-SoldierOfCode</guid>
+      <pubDate>Sun, 16 Nov 2025 12:30:54 GMT</pubDate>
+    </item>
+    <item>
+      <title>whimsical mentioned @Lensflare</title>
+      <link>https://devrant.com/rants/19381730</link>
+      <description>@SoldierOfCode aww, thanks. I will look in it today, duplication also mentioned by @Lensflare. But I don't know if I can add the &quot;Add new rant&quot; notifs in this rss because it maybe breaks @Lensflare system that depends on it. Maybe I could make extra rss. Will see how far I get :)</description>
+      <guid isPermaLink="false">devrant-mention-19384527-to-Lensflare</guid>
+      <pubDate>Sun, 16 Nov 2025 12:30:54 GMT</pubDate>
+    </item>
+    <item>
+      <title>D-4got10-01 mentioned @whimsical</title>
+      <link>https://devrant.com/rants/19384402</link>
+      <description>@whimsical I wouldn't be surprised if it was either malicious or a marketing move... or both.
+
+'Want to know whether this paper has been written by a human or is machine-generated? _We_ have a solution for you. Subscribe.'</description>
+      <guid isPermaLink="false">devrant-mention-19384519-to-whimsical</guid>
+      <pubDate>Sun, 16 Nov 2025 11:02:34 GMT</pubDate>
+    </item>
+    <item>
+      <title>whimsical mentioned @D-4got10-01</title>
+      <link>https://devrant.com/rants/19384402</link>
+      <description>@D-4got10-01 yeah, you could think maybe, leave it there just like pictures from gemini have a little logo so you can see it's AI.</description>
+      <guid isPermaLink="false">devrant-mention-19384518-to-D-4got10-01</guid>
+      <pubDate>Sun, 16 Nov 2025 10:59:23 GMT</pubDate>
+    </item>
+    <item>
+      <title>AlgoRythm mentioned @Lensflare</title>
+      <link>https://devrant.com/rants/19384200</link>
+      <description>@Lensflare I don't quite see myself working with Swift or Kotlin in the foreseeable future, unfortunately. I do quite like Swift though, maybe I'll spend a weekend with it one of these times.</description>
+      <guid isPermaLink="false">devrant-mention-19384434-to-Lensflare</guid>
+      <pubDate>Sun, 16 Nov 2025 00:04:42 GMT</pubDate>
+    </item>
+    <item>
+      <title>AlgoRythm mentioned @Lensflare</title>
+      <link>https://devrant.com/rants/19384200</link>
+      <description>@Lensflare That's the tragedy, isn't it? Excited to learn it, but crushed by the reality that it'll only ever benefit me in personal projects or academically.</description>
+      <guid isPermaLink="false">devrant-mention-19384433-to-Lensflare</guid>
+      <pubDate>Sun, 16 Nov 2025 00:03:29 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
