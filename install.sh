@@ -7,6 +7,12 @@ SERVICE_DIR=/usr/lib/systemd/user
 
 set -e
 
+echo "Installing dependencies"
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+deactivate
+
 echo "Installing $APP_NAME to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR/$APP_NAME"
 cp -r .venv *.py "$BIN_NAME.service" icon.png uninstall.sh "$INSTALL_DIR/$APP_NAME"
